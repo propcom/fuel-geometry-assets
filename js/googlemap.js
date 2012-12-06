@@ -19,7 +19,7 @@ var google = google || null;
 			};
 
 			// Need to wait until Google has finished before we can do default behaviour
-			$('.js-googlemap').each(function(){
+			$('.js-geometry-surface.js-googlemap').each(function(){
 				var $this = $(this);
 
 				var options = {};
@@ -35,14 +35,29 @@ var google = google || null;
 
 				$(document).trigger('create.googlemap', [map]);
 
-				var surface = $(this).data('surface');
+				/*var surface = $(this).data('surface');
 
 				$.getJSON('/geometry/api/surface/all_points?surface='+surface)
 					.success(function(data){
 						data && $.each(data, function(){
 							map.add_point(this.point_x, this.point_y, this.data);
 						});
+					});*/
+
+				if ($(this).data('points')) {
+					$.each($(this).data('points'), function(){
+						if (parseInt(this)) {
+							$.getJSON('/geometry/api/point/find', {point: this.valueOf(), surface: $this.data('surface')})
+								.success(function(data){
+									if (data && data.point_x && data.point_y) {
+										map.add_point(data.point_x, data.point_y, data)
+									}
+								});
+						} else {
+							map.add_point(this.point_x, this.point_y, this);
+						}
 					});
+				}
 			});
 
 			$(document).trigger('load.googlemap');
@@ -54,8 +69,10 @@ var google = google || null;
 		options = $.extend({}, default_options, options);
 		this.map = new google.maps.Map($elem[0], options);
 
+		this._marker_template = $('.js-geometry-point["data-surface"="'+$elem.data('surface')+'"]:first');
+		this._marker_template.remove();
+
 		this._markers = [];
-		this._info = null;
 	}
 
 	GoogleMap.prototype = {
@@ -97,9 +114,20 @@ var google = google || null;
 				this.info = null;
 			}
 
+			if (!mark.content) {
+				var popup = this._marker_template.clone(true);
+				popup.find('.js-geometry-point-data[data-field]').each(function(){
+					var field = $(this).data('field');
+					var value = data[field];
+					$(this).html(value);
+				});
+
+				mark.content = popup.wrap('<div></div>').parent().html();
+			}
+
 		    // Add new infowindow
 		    this.info = new google.maps.InfoWindow({
-		    	content: '<div class="infowindow"><div class="infowindow-title">' + data + '</div></div>'
+		    	content: '<div class="infowindow"><div class="infowindow-title">' + mark.content + '</div></div>'
 		    });
 
 		    this.info.open(mark.getMap(), mark);
