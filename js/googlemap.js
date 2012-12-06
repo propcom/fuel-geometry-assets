@@ -69,10 +69,17 @@ var google = google || null;
 		options = $.extend({}, default_options, options);
 		this.map = new google.maps.Map($elem[0], options);
 
+		this._markers = [];
 		this._marker_template = $('.js-geometry-point["data-surface"="'+$elem.data('surface')+'"]:first');
 		this._marker_template.remove();
 
-		this._markers = [];
+		var googlemap = this;
+		google.maps.event.addListener(this.map, 'click', function(){
+			if (googlemap.info) {
+				googlemap.info.close();
+				googlemap.info = null;
+			}
+		});
 	}
 
 	GoogleMap.prototype = {
