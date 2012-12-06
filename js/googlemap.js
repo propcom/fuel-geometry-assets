@@ -121,23 +121,35 @@ var google = google || null;
 				this.info = null;
 			}
 
-			if (!mark.content) {
+			if (mark.content == undefined) {
+				var found_data = false;
+
 				var popup = this._marker_template.clone(true);
 				popup.find('.js-geometry-point-data[data-field]').each(function(){
 					var field = $(this).data('field');
 					var value = data[field];
-					$(this).html(value);
+
+					if (value) {
+						found_data = true;
+						$(this).html(value);
+					}
+					else {
+						$(this).remove();
+					}
 				});
 
 				mark.content = popup.wrap('<div></div>').parent().html();
+				mark.found_data = found_data;
 			}
 
-		    // Add new infowindow
-		    this.info = new google.maps.InfoWindow({
-		    	content: '<div class="infowindow"><div class="infowindow-title">' + mark.content + '</div></div>'
-		    });
+			if (mark.found_data) {
+				// Add new infowindow
+				this.info = new google.maps.InfoWindow({
+					content: mark.content
+				});
 
-		    this.info.open(mark.getMap(), mark);
+				this.info.open(mark.getMap(), mark);
+			}
 		}
 	};
 
