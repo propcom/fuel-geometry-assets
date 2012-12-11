@@ -56,16 +56,18 @@ var google = google || null;
 	});
 
 	function GoogleMap(selector, options) {
-		var $elem = $(selector);
-		options = $.extend({}, default_options, options);
-		this.map = new google.maps.Map($elem[0], options);
-
-		this._markers = [];
-		this._marker_template = $('.js-geometry-point["data-surface"="'+$elem.data('surface')+'"]:first');
-		this._marker_template.remove();
-
 		var googlemap = this;
-		google.maps.event.addListener(this.map, 'click', function(){
+		var $elem = $(selector);
+
+		options = $.extend({}, default_options, options);
+		googlemap.map = new google.maps.Map($elem[0], options);
+
+		googlemap._markers = [];
+		googlemap._marker_template = $('.js-geometry-point[data-surface="'+$elem.data('surface')+'"]:first');
+		googlemap._marker_template.remove();
+
+		// Close the InfoWindow when map is clicked
+		google.maps.event.addListener(googlemap.map, 'click', function(){
 			if (googlemap.info) {
 				googlemap.info.close();
 				googlemap.info = null;
