@@ -33,16 +33,7 @@ var google = google || null;
 				var map = new GoogleMap(this, options);
 				$this.data('googlemap', map);
 
-				$(document).trigger('create.googlemap', [map]);
-
-				/*var surface = $(this).data('surface');
-
-				$.getJSON('/geometry/api/surface/all_points?surface='+surface)
-					.success(function(data){
-						data && $.each(data, function(){
-							map.add_point(this.point_x, this.point_y, this.data);
-						});
-					});*/
+				$this.trigger('create.googlemap', [map]);
 
 				if ($(this).data('points')) {
 					$.each($(this).data('points'), function(){
