@@ -23,8 +23,8 @@ var google = google || null;
 				var $this = $(this);
 
 				var options = {};
-				if ($this.data('lat') && $this.data('lon')) {
-					options.center = new google.maps.LatLng($this.data('lat'), $this.data('lon'));
+				if ($this.data('lat') && $this.data('lng')) {
+					options.center = new google.maps.LatLng($this.data('lat'), $this.data('lng'));
 				}
 				if ($this.data('zoom')) {
 					options.zoom = $this.data('zoom');
@@ -76,14 +76,28 @@ var google = google || null;
 	}
 
 	GoogleMap.prototype = {
-		add_point: function(lat, lng, data) {
+		add_point: function(lat, lng, data, category) {
+			var icon;
+			if (data && data.map_marker) {
+				icon = data.map_marker;
+			}
+
 			var marker = new google.maps.Marker({
 				map: this.map,
 				position: new google.maps.LatLng(lat,lng),
-				animation: google.maps.Animation.DROP
+				animation: null,
+				icon: icon || null
 			});
 
-			this._markers.push(marker);
+			if ( ! category && data) {
+				category = data.category_id;
+			}
+			category = category || 'default';
+
+			this._markers.push({
+				marker: marker,
+				category: category
+			});
 
 			if (data) {
 				var googlemap = this;
